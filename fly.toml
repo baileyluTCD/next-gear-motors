@@ -1,0 +1,28 @@
+app = 'next-gear-motors'
+primary_region = 'lhr'
+kill_signal = 'SIGTERM'
+
+[build]
+image = "registry.fly.io/next-gear-motors:latest"
+
+[env]
+PHX_HOST = 'next-gear-motors.fly.dev'
+PORT = '8080'
+
+[http_service]
+internal_port = 8080
+force_https = true
+auto_stop_machines = 'stop'
+auto_start_machines = true
+min_machines_running = 0
+processes = ['app']
+
+[http_service.concurrency]
+type = 'connections'
+hard_limit = 1000
+soft_limit = 1000
+
+[[vm]]
+memory = '1gb'
+cpu_kind = 'shared'
+cpus = 1
