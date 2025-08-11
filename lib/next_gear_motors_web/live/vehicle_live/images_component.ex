@@ -86,6 +86,7 @@ defmodule NextGearMotorsWeb.VehicleLive.ImagesComponent do
     {:ok,
      socket
      |> assign(:covers, %{})
+     |> assign(:in_progress_covers, MapSet.new())
      |> allow_upload(:covers,
        accept: ~w(.png .jpg .jpeg),
        max_entries: 20,
@@ -101,9 +102,18 @@ defmodule NextGearMotorsWeb.VehicleLive.ImagesComponent do
     send_update(socket.assigns.parent, covers: to_waffle_ecto_type_array(covers))
     send(self(), {:put_flash, [:info, "Image Processing Completed!"]})
 
+    in_progress_covers = MapSet.delete(socket.assigns.in_progress_covers, ref)
+
+    if MapSet.size(in_progress_covers) == 0 do
+      send_update(socket.assigns.parent, covers_progress: :finished)
+    else
+      send_update(socket.assigns.parent, covers_progress: :unfinished)
+    end
+
     {:ok,
      socket
      |> assign(:covers, covers)
+     |> assign(:in_progress_covers, in_progress_covers)
      |> cancel_upload(:covers, ref)}
   end
 
@@ -119,9 +129,13 @@ defmodule NextGearMotorsWeb.VehicleLive.ImagesComponent do
   defp handle_progress(:covers, entry, socket) do
     if entry.done? do
       async_upload_waffle_file(socket, entry)
-    end
 
-    {:noreply, socket}
+      {:noreply, socket}
+    else
+      in_progress_covers = MapSet.put(socket.assigns.in_progress_covers, entry.ref)
+
+      {:noreply, assign(socket, :in_progress_covers, in_progress_covers)}
+    end
   end
 
   defp async_upload_waffle_file(socket, %Phoenix.LiveView.UploadEntry{} = entry) do
