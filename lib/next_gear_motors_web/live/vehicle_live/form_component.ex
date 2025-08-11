@@ -31,6 +31,7 @@ defmodule NextGearMotorsWeb.VehicleLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
+        <.input field={@form[:covers_uploads_status]} type="hidden" />
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:price]} type="text" label="Price" />
         <.input field={@form[:description]} type="textarea" label="Description" />
@@ -49,6 +50,7 @@ defmodule NextGearMotorsWeb.VehicleLive.FormComponent do
      socket
      |> assign(assigns)
      |> assign(:covers, vehicle.covers)
+     |> assign(:covers_uploads_status, :finished)
      |> assign_new(:form, fn ->
        to_form(Vehicles.change_vehicle(vehicle))
      end)}
@@ -58,9 +60,20 @@ defmodule NextGearMotorsWeb.VehicleLive.FormComponent do
     {:ok, assign(socket, :covers, covers)}
   end
 
+  def update(%{:covers_progress => status}, socket) do
+    {:ok, assign(socket, :covers_uploads_status, status)}
+  end
+
   @impl true
   def handle_event(event, %{"vehicle" => vehicle_params}, socket) do
-    vehicle_params = Map.put(vehicle_params, "covers", Map.get(socket.assigns, :covers, []))
+    vehicle_params =
+      vehicle_params
+      |> Map.put("covers", Map.get(socket.assigns, :covers, []))
+      |> Map.put(
+        "covers_uploads_status",
+        Map.get(socket.assigns, :covers_uploads_status, :unfinished)
+      )
+
     handle_event_with_covers(event, vehicle_params, socket)
   end
 

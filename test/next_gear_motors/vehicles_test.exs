@@ -76,7 +76,8 @@ defmodule NextGearMotors.VehiclesTest do
         description: "some description",
         price: "invalid price",
         manufacturer: "some manufacturer",
-        cover: [cover]
+        cover: [cover],
+        covers_uploads_status: :unfinished
       }
 
       assert {:error, %Ecto.Changeset{}} = Vehicles.create_vehicle(invalid_attrs)

@@ -18,7 +18,11 @@ defmodule NextGearMotors.Vehicles.Covers.Cover do
       |> Path.extname()
       |> String.downcase()
 
-    Enum.member?(@extensions, file_extension)
+    if Enum.member?(@extensions, file_extension),
+      do: :ok,
+      else:
+        {:error,
+         "extension found on #{file.path} was not contained within #{inspect(@extensions)}"}
   end
 
   def transform(_version, _), do: {&to_webp/2, fn _, _ -> :webp end}
