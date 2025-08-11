@@ -145,9 +145,11 @@ defmodule NextGearMotorsWeb.VehicleLive.ImagesComponent do
 
     consume_uploaded_entry(socket, entry, fn %{} = meta ->
       Task.Supervisor.start_child(NextGearMotors.TaskSupervisor, fn ->
+        now = System.os_time(:nanosecond) |> Integer.to_string()
+
         cover = %Plug.Upload{
           content_type: entry.client_type,
-          filename: entry.client_name,
+          filename: "#{now}-#{entry.client_name}",
           path: meta.path
         }
 
