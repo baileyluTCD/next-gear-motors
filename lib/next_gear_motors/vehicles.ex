@@ -106,7 +106,7 @@ defmodule NextGearMotors.Vehicles do
   def update_vehicle(%Vehicle{} = vehicle, attrs) do
     covers = get_covers_from_attrs(attrs)
 
-    if covers && !Enum.empty?(covers) do
+    if covers && !Enum.empty?(covers) && covers != vehicle.covers do
       for cover <- vehicle.covers do
         Cover.delete({cover, vehicle})
       end
